@@ -24,7 +24,7 @@
         </span>
       </el-form-item>
       <el-form-item>
-        <el-button :loading="loading" type="primary" style="width:100%;" @click.native.prevent="handleLogin">
+        <el-button :loading="loading" type="primary" style="width:100%;"  @click="submit('loginForm')">
           Sign in
         </el-button>
       </el-form-item>
@@ -58,12 +58,12 @@ export default {
     }
     return {
       loginForm: {
-        username: 'admin',
-        password: 'admin'
+        username: '',
+        password: ''
       },
       loginRules: {
-        username: [{ required: true, trigger: 'blur', validator: validateUsername }],
-        password: [{ required: true, trigger: 'blur', validator: validatePass }]
+          username: [{ required: true, message: '请输入账号', trigger: 'blur' }],
+          password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
       },
       loading: false,
       pwdType: 'password',
@@ -86,21 +86,30 @@ export default {
         this.pwdType = 'password'
       }
     },
-    handleLogin() {
-      this.$refs.loginForm.validate(valid => {
-        if (valid) {
-          this.loading = true
-          this.$store.dispatch('Login', this.loginForm).then(() => {
-            this.loading = false
-            this.$router.push({ path: this.redirect || '/' })
-          }).catch(() => {
-            this.loading = false
-          })
-        } else {
-          console.log('error submit!!')
-          return false
-        }
-      })
+    submit(formName) {
+      let self = this;
+        this.$refs[formName].validate((valid) => {
+          if (valid) {
+            let qs = require('qs'); 
+            this.$axios.post('/admin/login', qs.stringify(this.loginForm))
+            .then(function(response) {
+              console.log(response);
+              if (response.data.success) {
+                localStorage.setItem('token', response.data.token);
+                self.$router.push({ path: '/' });
+              } else {
+                // console.log(response.data.msg)
+                self.$message.error(response.data.msg);
+              }
+            })
+            .catch(function(error) {
+              console.log(error.response.data.msg)
+              self.$message.error(error.response.data.msg);
+            });
+          } else {
+            return false;
+          }
+        });
     }
   }
 }
