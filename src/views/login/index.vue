@@ -1,7 +1,7 @@
 <template>
   <div class="login-container">
     <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" auto-complete="on" label-position="left">
-      <h3 class="title">vue-admin-template</h3>
+      <h3 class="title">公众号小说管理后台</h3>
       <el-form-item prop="username">
         <span class="svg-container">
           <svg-icon icon-class="user" />
@@ -18,19 +18,19 @@
           name="password"
           auto-complete="on"
           placeholder="password"
-          @keyup.enter.native="handleLogin" />
+          @keyup.enter.native="submit" />
         <span class="show-pwd" @click="showPwd">
           <svg-icon icon-class="eye" />
         </span>
       </el-form-item>
       <el-form-item>
         <el-button :loading="loading" type="primary" style="width:100%;"  @click="submit('loginForm')">
-          Sign in
+          Sign in ->
         </el-button>
       </el-form-item>
       <div class="tips">
-        <span style="margin-right:20px;">username: admin</span>
-        <span> password: admin</span>
+        <span style="margin-right:20px;"></span>
+        <span></span>
       </div>
     </el-form>
   </div>
@@ -121,6 +121,10 @@ $light_gray:#eee;
 
 /* reset element-ui css */
 .login-container {
+  .el-form-item__error{
+    width: 100%;
+    text-indent: 10px;
+  }
   .el-input {
     display: inline-block;
     height: 47px;

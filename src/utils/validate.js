@@ -30,3 +30,20 @@ export function validatAlphabets(str) {
   const reg = /^[A-Za-z]+$/
   return reg.test(str)
 }
+
+/*电话号验证*/
+export function isvalidPhone(str){
+  const reg = /^1[3|4|5|7|8][0-9]\d{8}$/
+  return reg.test(str)
+}
+
+// qq号码验证
+export function isvalidQQ(str){
+  const reg = /^[1-9][0-9]{4,9}$/gim;
+  return reg.test(str)
+}
+
+export function isValidURL(url){
+  var urlRegExp=/^((https|http|ftp|rtsp|mms)?:\/\/)+[A-Za-z0-9]+\.[A-Za-z0-9]+[\/=\?%\-&_~`@[\]\':+!]*([^<>\"\"])*$/;
+  return urlRegExp.test(url)
+}

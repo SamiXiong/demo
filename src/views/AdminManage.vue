@@ -31,7 +31,7 @@
         <el-button @click="add" size="small">添加</el-button>
       </el-form-item>
       <el-form-item>
-        <el-button @click="searchSubmit" size="small">导出报表</el-button>
+        <el-button @click="exportTable" size="small">导出报表</el-button>
       </el-form-item>
     </el-form>
 
@@ -101,11 +101,11 @@
         <el-form-item label="账号" prop="username">
           <el-input v-model="addForm.username" placeholder="请输入账号"></el-input>
         </el-form-item>
-        <el-form-item label="密码" prop="password">
-          <el-input type="password" v-model="addForm.password" placeholder="请输入密码"></el-input>
+        <el-form-item label="姓名" prop="truename">
+          <el-input v-model="addForm.truename" placeholder="请输入姓名"></el-input>
         </el-form-item>
-        <el-form-item label="重复密码" prop="repassword">
-          <el-input type="password" v-model="addForm.repassword" placeholder="请再次输入密码"></el-input>
+        <el-form-item label="联系方式" prop="telephone">
+          <el-input v-model="addForm.telephone" placeholder="请输入联系方式"></el-input>
         </el-form-item>
         <el-form-item label="角色">
           <el-select v-model="addForm.roleId" filterable placeholder="角色" size="small">
@@ -117,11 +117,11 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="姓名" prop="truename">
-          <el-input v-model="addForm.truename" placeholder="请输入姓名"></el-input>
+        <el-form-item label="密码" prop="password">
+          <el-input type="password" v-model="addForm.password" placeholder="请输入密码"></el-input>
         </el-form-item>
-        <el-form-item label="联系方式" prop="telephone">
-          <el-input v-model="addForm.telephone" placeholder="请输入联系方式"></el-input>
+        <el-form-item label="重复密码" prop="repassword">
+          <el-input type="password" v-model="addForm.repassword" placeholder="请再次输入密码"></el-input>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
@@ -172,6 +172,7 @@
 export default {
   data() {
     return {
+      jsonData:[],
       tableData: [],
       totalCount: 0,
       currentPage1: 1,
@@ -225,10 +226,54 @@ export default {
       }
 
       this.$axios.get(url).then(res => {
-        console.log(res.data);
         this.tableData = res.data.data;
+        for (let i in this.tableData){
+          let created_time = this.tableData[i].created_time
+          this.tableData[i].created_time = new Date(parseInt(created_time) * 1000).toLocaleString().replace(/:\d{1,2}$/,' ')
+        }
         this.totalCount = res.data.total_count;
       });
+    },
+    exportTable(){
+      let self = this
+      self.jsonData = []
+      let str = `账号,姓名,联系方式,角色,状态,创建时间,\n`;
+      for (let i in this.tableData){
+        let status = ""
+        switch(this.tableData[i].status){
+          case  'enable':
+          status = '启用'
+          break;
+          case  'disable':
+          status = '禁用'
+          break;
+        }
+        self.jsonData.push({
+          account:this.tableData[i]['username'],
+          name:this.tableData[i]['truename'],
+          tel:this.tableData[i]['telephone'],
+          rol:this.tableData[i]['roleName'],
+          status:status,
+          created_time:this.tableData[i]['created_time']
+        })
+      }
+      let jsonData = self.jsonData
+       for(let i = 0 ; i < jsonData.length ; i++ ){
+        for(let item in jsonData[i]){
+            str+=`${jsonData[i][item] + '\t'},`;     
+        }
+        str+='\n';
+      }
+      //encodeURIComponent解决中文乱码
+      let uri = 'data:text/csv;charset=utf-8,\ufeff' + encodeURIComponent(str);
+      //通过创建a标签实现
+      var link = document.createElement("a");
+      link.href = uri;
+      //对下载的文件命名
+      link.download =  "我来试试可以不.csv";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     },
     getRoleOptions: function() {
       this.$axios.get("admin/role/find/all").then(res => {
@@ -306,30 +351,38 @@ export default {
     },
     addSubmit: function(formName) {
       let self = this;
-      this.$refs[formName].validate(valid => {
-        if (valid) {
-          let qs = require("qs");
-          this.$axios
-            .post("/admin/admin_user/create", qs.stringify(this.addForm))
-            .then(function(response) {
-              if (response.data.success) {
-                self.$message({
-                  message: response.data.msg,
-                  type: "success"
-                });
-                self.addDialogVisible = false;
-                self.searchData();
-              } else {
-                self.$message.error(response.data.msg);
-              }
-            })
-            .catch(function(error) {
-              self.$message.error(error.response.data.msg);
-            });
-        } else {
-          return false;
-        }
+      let from = self.addForm
+      if(from.username==''){
+        self.$message.error('请输入用户名');
+      }else if(from.password!=from.repassword){
+        self.$message.error('两次密码输入不一致');
+      }else{
+         this.$refs[formName].validate(valid => {
+          if (valid) {
+            let qs = require("qs");
+            this.$axios
+              .post("/admin/admin_user/create", qs.stringify(this.addForm))
+              .then(function(response) {
+                if (response.data.success) {
+                  self.$message({
+                    message: response.data.msg,
+                    type: "success"
+                  });
+                  self.addDialogVisible = false;
+                  self.searchData();
+                } else {
+                  self.$message.error(response.data.msg);
+                }
+              })
+              .catch(function(error) {
+                console.log(1)
+                // self.$message.error(error.response.data.msg);
+              });
+          } else {
+            return false;
+          }
       });
+      }
     },
     edit: function(row) {
       this.curRowId = row.id;
@@ -341,6 +394,7 @@ export default {
     },
     edtSubmit: function(formName) {
       let self = this;
+      console.log(1)
       this.$refs[formName].validate(valid => {
         if (valid) {
           let qs = require("qs");
@@ -358,11 +412,14 @@ export default {
                 self.edtDialogVisible = false;
                 self.searchData();
               } else {
-                self.$message.error(response.data.msg);
+                console.log('1')
+                // self.$message.error("错了")
+                // self.$message.error(response.data.msg);
               }
             })
             .catch(function(error) {
-              self.$message.error(error.response.data.msg);
+              console.log(2)
+              // self.$message.error(error.response.data.msg);
             });
         } else {
           return false;

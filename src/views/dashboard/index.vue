@@ -1,7 +1,6 @@
 <template>
   <div class="dashboard-container">
-    <div class="dashboard-text">name:{{ name }}</div>
-    <div class="dashboard-text">roles:<span v-for="role in roles" :key="role">{{ role }}</span></div>
+      <div>欢迎来到公众号小说管理平台</div>
   </div>
 </template>
 

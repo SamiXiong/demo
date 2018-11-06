@@ -76,7 +76,8 @@ export const constantRouterMap = [
         path: 'wechat_public_manage',
         name: 'wechat_public_manage',
         component: () => import('@/views/WechatPublicManage'),
-        meta: { title: '公众号管理', icon: 'form' }
+        meta: { title: '公众号管理', icon: 'form' },
+        hidden:false
       },
     ]
   },
@@ -220,7 +221,7 @@ export const constantRouterMap = [
       },
     ]
   },
-
+  
   // {
   //   path: '/nested',
   //   component: Layout,

@@ -9,6 +9,7 @@ const service = axios.create({
   baseURL:'',
   timeout: 5000 // 请求超时时间
 })
+// // request拦截器
 service.interceptors.request.use(
   config => {
     // 这里写死一个token，你需要在这里取到你设置好的token的值

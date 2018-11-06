@@ -17,6 +17,13 @@
 	  <el-form-item label="昵称">
 	    <el-input v-model="formInline.nickname" placeholder="昵称" size="small" clearable></el-input>
 	  </el-form-item>
+		<el-form-item label="性别">
+	     <el-select v-model="formInline.vipType" placeholder="类型" size="small">
+	      <el-option label="全部" value=""></el-option>
+	      <el-option label="普通会员" value="0"></el-option>
+	      <el-option label="VIP会员" value="1"></el-option>
+	    </el-select>
+	  </el-form-item>
 	  <el-form-item label="类型">
 	    <el-select v-model="formInline.vipType" placeholder="类型" size="small">
 	      <el-option label="全部" value=""></el-option>
@@ -24,11 +31,11 @@
 	      <el-option label="VIP会员" value="vip"></el-option>
 	    </el-select>
 	  </el-form-item>
-	  <el-form-item label="是否关注">
-	    <el-select v-model="formInline.isAttention" placeholder="是否关注" size="small">
+	  <el-form-item label="性别">
+	    <el-select v-model="formInline.sex" placeholder="性别" size="small">
 	      <el-option label="全部" value=""></el-option>
-	      <el-option label="已关注" value="1"></el-option>
-	      <el-option label="未关注" value="0"></el-option>
+	      <el-option label="男" value="0"></el-option>
+	      <el-option label="女" value="1"></el-option>
 	    </el-select>
 	  </el-form-item>
 	  <el-form-item label="注册开始时间">
@@ -55,7 +62,7 @@
 	    <el-button type="primary" @click="searchSubmit" size="small">查询</el-button>
 	  </el-form-item>
 	  <el-form-item>
-	    <el-button @click="searchSubmit" size="small">导出报表</el-button>
+	    <el-button @click="exportTable" size="small">导出报表</el-button>
 	  </el-form-item>
 	</el-form>
 
@@ -81,6 +88,20 @@
 	    prop="nickname"
 	    label="昵称"
 	    width="150">
+			<template slot-scope="scope">
+				<div class="clearfix">
+					<span class="left username">{{scope.row.nickname}}</span>
+					<img :src=scope.row.headimageurl alt="" class="user-avatar right">
+				</div>
+			</template>
+	  </el-table-column>
+		<el-table-column
+	    prop="sex"
+	    label="性别"
+	    width="150">
+			<template slot-scope="scope">
+				{{ scope.row.sex == null ? '未知' : (scope.row.sex == 0 ? '男' : '女') }}
+			</template>
 	  </el-table-column>
 	  <el-table-column
 	    prop="pay_money"
@@ -114,24 +135,25 @@
 	      {{ scope.row.is_attention == 0 ? '未关注' : '已关注' }}
 	    </template>
 	  </el-table-column>
+		<el-table-column
+	    prop="attention_time"
+	    label="关注时间"
+	    width="250">
+	  </el-table-column>
 	  <el-table-column
 	    prop="created_time"
 	    label="注册时间"
 	    width="150">
 	  </el-table-column>
 	  <el-table-column
-	    prop="origin"
-	    label="来源"
-	    width="250">
-	  </el-table-column>
-	  <el-table-column
         fixed="right"
         label="操作"
         width="200">
         <template slot-scope="scope">
-          <el-button @click="show(scope.row)" type="text" size="small">查看</el-button>
+          <el-button @click="show(scope.row)" type="text" size="small">查看详细</el-button>
+					<el-button @click="show(scope.row)" type="text" size="small">查看业务数据</el-button>
         </template>
-      </el-table-column>
+    </el-table-column>
 	</el-table>
 	
     <el-pagination
@@ -142,19 +164,28 @@
       :total="totalCount">
     </el-pagination>
 
-    <el-dialog
+  <el-dialog
 	  title="用户信息"
 	  :visible.sync="dialogVisible"
 	  width="70%">
 	  <el-tabs v-model="activeName">
 	    <el-tab-pane label="用户信息" name="userInfo">
 	      <div>
-			<div>{{ curRow.nickname }}</div>
-			<div>书币:{{ curRow.virtual_money }}</div>
-			<div>性别:{{ curRow.sex == null ? '未知' : (curRow.sex == 0 ? '男' : '女') }}</div>
-			<div>地址:{{ (curRow.province == null ? '' : curRow.province) + ' ' + (curRow.city ==  null ? '' : curRow.city) }}</div>
-			<div>注册时间:{{ curRow.created_time }}</div>
-			<div>最近登录时间:{{ curRow.updated_time }}</div>
+			<div class="userinfo">公众号:{{curRow.wechat_public_name}}</div>
+			<div class="userinfo">编号:{{curRow.userno}}</div>
+			<div class="userinfo">昵称:{{ curRow.nickname }}</div>
+			<div class="userinfo">性别:{{ curRow.sex == null ? '未知' : (curRow.sex == 0 ? '男' : '女') }}</div>
+			<div class="userinfo">充值总金额:￥{{ curRow.pay_money / 100 }}</div>
+			<div class="userinfo">会员类型:{{ curRow.vip_type == 'normal' ? '普通会员' : 'VIP会员' }}</div>
+			<div class="userinfo">vip有效期:{{curRow.vip_range}}</div>
+			<div class="userinfo">是否关注:{{ curRow.is_attention == 0 ? '未关注' : '已关注' }}</div>
+			<div class="userinfo">关注时间:{{curRow.attention_time}}</div>
+			<div class="userinfo">注册时间:{{ curRow.created_time }}</div>
+			<div class="userinfo">书币:{{ curRow.virtual_money }}</div>
+			<div class="userinfo">国家:{{curRow.country}}</div>
+			<div class="userinfo">地址:{{ (curRow.province == null ? '' : curRow.province) + ' ' + (curRow.city ==  null ? '' : curRow.city) }}</div>
+			<div class="userinfo">openid:{{curRow.agent_id}}</div>
+			<div class="userinfo">最近登录时间:{{ curRow.updated_time }}</div>
 	      </div>
 	    </el-tab-pane>
 
@@ -436,11 +467,66 @@
 	  	}
 
 	    this.$axios.get(url).then(res=>{
-	      console.log(res.data);
-	      this.tableData = res.data.data;
+				this.tableData = res.data.data;
+					for (let i in this.tableData){
+					let created_time = this.tableData[i].created_time
+					let attention_time = this.tableData[i].attention_time
+					let updated_time = this.tableData[i].updated_time
+					this.tableData[i].created_time = new Date(parseInt(created_time) * 1000).toLocaleString().replace(/:\d{1,2}$/,' ')
+					this.tableData[i].updated_time = new Date(parseInt(updated_time) * 1000).toLocaleString().replace(/:\d{1,2}$/,' ')
+					if(attention_time>0){
+						this.tableData[i].attention_time = new Date(parseInt(attention_time) * 1000).toLocaleString().replace(/:\d{1,2}$/,' ')
+					}
+				}
+				console.log(this.tableData)
 	      this.totalCount = res.data.total_count;
 	    });
-	  },
+		},
+		exportTable(){
+      let self = this
+      self.jsonData = []
+      let str = `公众号,编号,昵称,性别,充值总金额,会员类型,vip有效期,是否关注,关注时间,创建时间\n`;
+      for (let i in this.tableData){
+        let status = ""
+        switch(this.tableData[i].status){
+          case  'enable':
+          status = '启用'
+          break;
+          case  'disable':
+          status = '禁用'
+          break;
+        }
+        self.jsonData.push({
+          wechat_public_name:this.tableData[i]['wechat_public_name'],
+          wechat_public_id:this.tableData[i]['wechat_public_id'],
+          nickname:this.tableData[i]['nickname'],
+          sex:this.tableData[i].sex == null ? '未知' : (this.tableData[i].sex == 0 ? '男' : '女') ,
+					pay_money:(this.tableData[i]['pay_money']/100),
+					vip_type:this.tableData[i].vip_type == 'normal' ? '普通会员' : 'VIP会员',
+					vip_range:this.tableData[i]['vip_range'],
+					is_attention:this.tableData[i].is_attention == 0 ? '未关注' : '已关注',
+					attention_time:this.tableData[i].attention_time,
+          created_time:this.tableData[i]['created_time']
+        })
+      }
+      let jsonData = self.jsonData
+       for(let i = 0 ; i < jsonData.length ; i++ ){
+        for(let item in jsonData[i]){
+            str+=`${jsonData[i][item] + '\t'},`;     
+        }
+        str+='\n';
+			}
+      //encodeURIComponent解决中文乱码
+      let uri = 'data:text/csv;charset=utf-8,\ufeff' + encodeURIComponent(str);
+      //通过创建a标签实现
+      var link = document.createElement("a");
+      link.href = uri;
+      //对下载的文件命名
+      link.download =  "粉丝明细.csv";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    },
 	  searchDataReadLog: function(){
 	  	let url = "/admin/read_log/list?wechatPublicId=" + this.curRow.wechat_public_id 
 	  		+ "&userId=" + this.curRow.id + "&page=" + this.currentPageReadLog;

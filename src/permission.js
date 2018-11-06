@@ -6,24 +6,10 @@ import { Message } from 'element-ui'
 import { getToken } from '@/utils/auth' // 验权
 
 const whiteList = ['/login'] // 不重定向白名单
-// let token = localStorage.getItem('token');
-    let token = localStorage.getItem('token');
 router.beforeEach((to, from, next) => {
-  // NProgress.start()
-  // if (token) {
-    
-  //   next();
-  //   NProgress.done()
-  // } else {
-  //   next();
-  //   router.push({ path: '/login' });
-  //   NProgress.done()
-  // }
-  // NProgress.start()
- 
-
+  let token = localStorage.getItem('token');
+  console.log(token)
   if (token) {
-    console.log(token)
     if (to.path === '/login') {
       next({ path: '/' })
       // NProgress.done() // if current page is dashboard will not trigger	afterEach hook, so manually handle it
